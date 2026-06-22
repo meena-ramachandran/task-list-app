@@ -7,10 +7,7 @@ import java.io.PrintWriter;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public final class TaskList implements Runnable {
     private static final String QUIT = "quit";
@@ -73,6 +70,9 @@ public final class TaskList implements Runnable {
                 break;
             case "today":
                 today();
+                break;
+            case "view-by-deadline":
+                viewByDeadline();
                 break;
             case "help":
                 help();
@@ -167,6 +167,37 @@ public final class TaskList implements Runnable {
         out.println();
     }
 
+    private void viewByDeadline() {
+        Map<LocalDate, List<Task>> deadlineGroups = new TreeMap<>();
+        List<Task> noDeadlineTasks = new ArrayList<>();
+        for (Map.Entry<String, List<Task>> project : tasks.entrySet()) {
+            for (Task task : project.getValue()) {
+                if (task.getDeadline() == null) {
+                    noDeadlineTasks.add(task);
+                } else {
+                    deadlineGroups.computeIfAbsent(task.getDeadline(), d -> new ArrayList<>()).add(task);
+                }
+            }
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        for (Map.Entry<LocalDate, List<Task>> group : deadlineGroups.entrySet()) {
+            out.println(group.getKey().format(formatter) + ":");
+            for (Task task : group.getValue()) {
+                out.printf("    %d: %s%n",
+                        task.getId(),
+                        task.getDescription());
+            }
+        }
+        if (!noDeadlineTasks.isEmpty()) {
+            out.println("No deadline:");
+            for (Task task : noDeadlineTasks) {
+                out.printf("    %d: %s%n",
+                        task.getId(),
+                        task.getDescription());
+            }
+        }
+    }
+
     private void today() {
         for (Map.Entry<String, List<Task>> project : tasks.entrySet()) {
             List<Task> todayTasks = new ArrayList<>();
@@ -194,6 +225,7 @@ public final class TaskList implements Runnable {
         out.println("  uncheck <task ID>");
         out.println("  deadline <task ID> <date(dd-MM-yyyy)>");
         out.println("  today");
+        out.println("  view-by-deadline");
         out.println();
     }
 
