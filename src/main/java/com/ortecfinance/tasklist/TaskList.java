@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -69,6 +70,9 @@ public final class TaskList implements Runnable {
                 break;
             case "deadline":
                 deadline(commandRest[1]);
+                break;
+            case "today":
+                today();
                 break;
             case "help":
                 help();
@@ -143,17 +147,42 @@ public final class TaskList implements Runnable {
     private void deadline(String commandLine) {
         String[] parts = commandLine.split(" ", 2);
         int id = Integer.parseInt(parts[0]);
-        LocalDate deadline = LocalDate.parse(parts[1], FORMATTER);
-        for (Map.Entry<String, List<Task>> project : tasks.entrySet()) {
-            for (Task task : project.getValue()) {
-                if (task.getId() == id) {
-                    task.setDeadline(deadline);
-                    return;
+        try {
+            LocalDate deadline = LocalDate.parse(parts[1], FORMATTER);
+            for (Map.Entry<String, List<Task>> project : tasks.entrySet()) {
+                for (Task task : project.getValue()) {
+                    if (task.getId() == id) {
+                        task.setDeadline(deadline);
+                        return;
+                    }
                 }
             }
+        }catch (DateTimeParseException e) {
+            out.printf("Please enter the deadline in the format: dd-MM-yyyy");
+            out.println();
+            return;
         }
+
         out.printf("Could not find a task with an ID of %d.", id);
         out.println();
+    }
+
+    private void today() {
+        for (Map.Entry<String, List<Task>> project : tasks.entrySet()) {
+            List<Task> todayTasks = new ArrayList<>();
+            for (Task task : project.getValue()) {
+                if (LocalDate.now().equals(task.getDeadline())) {
+                    todayTasks.add(task);
+                }
+            }
+            if (!todayTasks.isEmpty()) {
+                out.println(project.getKey());
+                for (Task task : todayTasks) {
+                    out.printf("    [%c] %d: %s%n", task.isDone() ? 'x' : ' ', task.getId(), task.getDescription());
+                }
+                out.println();
+            }
+        }
     }
 
     private void help() {
@@ -164,6 +193,7 @@ public final class TaskList implements Runnable {
         out.println("  check <task ID>");
         out.println("  uncheck <task ID>");
         out.println("  deadline <task ID> <date(dd-MM-yyyy)>");
+        out.println("  today");
         out.println();
     }
 

@@ -3,6 +3,8 @@ package com.ortecfinance.tasklist;
 import org.junit.jupiter.api.*;
 
 import java.io.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import static java.lang.System.lineSeparator;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -130,6 +132,37 @@ public final class ApplicationTest {
                 "Could not find a task with an ID of 99."
         );
 
+        execute("quit");
+    }
+
+    @Test
+    void it_can_show_tasks_due_today() throws IOException {
+        String today = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+
+        execute("add project training");
+        execute("add task training Four Elements of Simple Design");
+        execute("add task training SOLID");
+        execute("deadline 1 " + today);
+
+        execute("today");
+
+        readLines(
+                "training",
+                "    [ ] 1: Four Elements of Simple Design",
+                ""
+        );
+
+        execute("quit");
+    }
+
+    @Test
+    void it_shows_an_error_for_an_invalid_date_format() throws IOException {
+        execute("add project training");
+        execute("add task training SOLID");
+        execute("deadline 1 2024-11-25");
+        readLines(
+                "Please enter the deadline in the format: dd-MM-yyyy"
+        );
         execute("quit");
     }
 
