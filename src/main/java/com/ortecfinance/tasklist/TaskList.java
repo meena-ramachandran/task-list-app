@@ -167,33 +167,28 @@ public final class TaskList implements Runnable {
         out.println();
     }
 
-    private void viewByDeadline() {
-        Map<LocalDate, List<Task>> deadlineGroups = new TreeMap<>();
-        List<Task> noDeadlineTasks = new ArrayList<>();
-        for (Map.Entry<String, List<Task>> project : tasks.entrySet()) {
-            for (Task task : project.getValue()) {
-                if (task.getDeadline() == null) {
-                    noDeadlineTasks.add(task);
-                } else {
-                    deadlineGroups.computeIfAbsent(task.getDeadline(), d -> new ArrayList<>()).add(task);
+    public void viewByDeadline(){
+        Map<Optional<LocalDate>, Map<String, List<Task>>> groupedTasks = new TreeMap<>(
+                Comparator.comparing(d -> d.orElse(LocalDate.MAX))
+        );
+
+        for (Map.Entry<String, List<Task>> projectEntry : tasks.entrySet()) {
+            String project = projectEntry.getKey();
+            for (Task task : projectEntry.getValue()) {
+                groupedTasks.computeIfAbsent(Optional.ofNullable(task.getDeadline()), d -> new LinkedHashMap<>()).computeIfAbsent(project, p -> new ArrayList<>()).add(task);
+            }
+        }
+
+        for (Map.Entry<Optional<LocalDate>, Map<String, List<Task>>> deadlineEntry : groupedTasks.entrySet()) {
+            String label = deadlineEntry.getKey()
+                    .map(d -> d.format(FORMATTER) + ":")
+                    .orElse("No deadline:");
+            out.println(label);
+            for (Map.Entry<String, List<Task>> project : deadlineEntry.getValue().entrySet()) {
+                out.println("    " + project.getKey());
+                for (Task task : project.getValue()) {
+                    out.printf("        %d: %s%n",  task.getId(), task.getDescription());
                 }
-            }
-        }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        for (Map.Entry<LocalDate, List<Task>> group : deadlineGroups.entrySet()) {
-            out.println(group.getKey().format(formatter) + ":");
-            for (Task task : group.getValue()) {
-                out.printf("    %d: %s%n",
-                        task.getId(),
-                        task.getDescription());
-            }
-        }
-        if (!noDeadlineTasks.isEmpty()) {
-            out.println("No deadline:");
-            for (Task task : noDeadlineTasks) {
-                out.printf("    %d: %s%n",
-                        task.getId(),
-                        task.getDescription());
             }
         }
     }

@@ -167,7 +167,7 @@ public final class ApplicationTest {
     }
 
     @Test
-    void it_can_view_tasks_grouped_by_deadline() throws IOException {
+    void it_can_view_tasks_grouped_by_deadline_and_project() throws IOException {
 
         execute("add project secrets");
         execute("add task secrets Eat more donuts.");
@@ -177,20 +177,24 @@ public final class ApplicationTest {
         execute("add task training Four Elements of Simple Design");
         execute("add task training Interaction-Driven Design");
 
-        execute("deadline 1 11-11-2021");
-        execute("deadline 3 11-11-2021");
-        execute("deadline 4 13-11-2021");
+        execute("deadline 1 25-11-2024");
+        execute("deadline 3 25-11-2024");
+        execute("deadline 4 30-11-2024");
 
         execute("view-by-deadline");
 
         readLines(
-                "11-11-2021:",
-                "    1: Eat more donuts.",
-                "    3: Four Elements of Simple Design",
-                "13-11-2021:",
-                "    4: Interaction-Driven Design",
+                "25-11-2024:",
+                "    secrets",
+                "        1: Eat more donuts.",
+                "    training",
+                "        3: Four Elements of Simple Design",
+                "30-11-2024:",
+                "    training",
+                "        4: Interaction-Driven Design",
                 "No deadline:",
-                "    2: Destroy all humans."
+                "    secrets",
+                "        2: Destroy all humans."
         );
 
         execute("quit");
