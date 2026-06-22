@@ -94,6 +94,45 @@ public final class ApplicationTest {
         execute("quit");
     }
 
+    @Test
+    void it_can_add_deadlines() throws IOException {
+
+        execute("add project training");
+        execute("add task training Four Elements of Simple Design");
+        execute("add task training SOLID");
+        execute("add task training Coupling and Cohesion");
+
+        execute("deadline 1 25-11-2024");
+        execute("deadline 3 30-11-2024");
+
+        execute("show");
+
+        readLines(
+                "training",
+                "    [ ] 1: Four Elements of Simple Design (25-11-2024)",
+                "    [ ] 2: SOLID",
+                "    [ ] 3: Coupling and Cohesion (30-11-2024)",
+                ""
+        );
+
+        execute("quit");
+    }
+
+    @Test
+    void deadline_for_unknown_task() throws IOException {
+
+        execute("add project training");
+        execute("add task training SOLID");
+
+        execute("deadline 99 25-11-2024");
+
+        readLines(
+                "Could not find a task with an ID of 99."
+        );
+
+        execute("quit");
+    }
+
     private void execute(String command) throws IOException {
         read(PROMPT);
         write(command);
