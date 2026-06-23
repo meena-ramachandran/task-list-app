@@ -2,6 +2,9 @@ package com.ortecfinance.tasklist.service;
 
 import com.ortecfinance.tasklist.domain.Project;
 import com.ortecfinance.tasklist.domain.Task;
+import com.ortecfinance.tasklist.exception.ProjectAlreadyExistsException;
+import com.ortecfinance.tasklist.exception.ProjectNotFoundException;
+import com.ortecfinance.tasklist.exception.TaskNotFoundException;
 import com.ortecfinance.tasklist.store.ProjectStore;
 import org.springframework.stereotype.Service;
 
@@ -21,14 +24,14 @@ public class ProjectService {
             throw new IllegalArgumentException("Project name cannot be empty.");
         }
         if (store.existsByName(name)) {
-            throw new RuntimeException("Project already exists.");
+            throw new ProjectAlreadyExistsException(name);
         }
         return store.save(new Project(name));
     }
 
     public void removeProject(String name) {
         if (!store.existsByName(name)) {
-            throw new RuntimeException("Project does not exist.");
+            throw new ProjectNotFoundException(name);
         }
         store.deleteByName(name);
     }
@@ -41,25 +44,32 @@ public class ProjectService {
         if (description == null || description.trim().isEmpty()) {
             throw new IllegalArgumentException("Task description cannot be empty.");
         }
-        Project project = store.findByName(projectName).orElseThrow(() -> new RuntimeException("Project does not exist.") );
+        Project project = store.findByName(projectName).orElseThrow(() -> new ProjectNotFoundException(projectName) );
         return store.saveTask(project, description);
     }
 
     public Task setDeadline(long taskId, LocalDate deadline) {
-        Task task = store.findTaskById(taskId).orElseThrow(() -> new RuntimeException("Task does not exist"));
+        Task task = store.findTaskById(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
         task.setDeadline(deadline);
         return task;
     }
 
     public Task setDone(long taskId, boolean done) {
-        Task task = store.findTaskById(taskId).orElseThrow(() -> new RuntimeException("Task does not exist"));
+        Task task = store.findTaskById(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
         task.setDone(done);
         return task;
     }
 
     public void removeTask(long taskId) {
-        Task task = store.findTaskById(taskId).orElseThrow(() -> new RuntimeException("Task does not exist"));
+        Task task = store.findTaskById(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
         store.deleteTaskById(taskId);
+    }
+
+    public Task setDeadline(String projectName, long taskId, LocalDate deadline) {
+        Project project =store.findByName(projectName).orElseThrow(() -> new ProjectNotFoundException(projectName));
+        Task task = project.findTask(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
+        task.setDeadline(deadline);
+        return task;
     }
 
     public Map<String, List<Task>> getTasksForToday(LocalDate today) {

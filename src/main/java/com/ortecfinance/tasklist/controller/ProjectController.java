@@ -62,7 +62,7 @@ public class ProjectController {
                 throw new IllegalArgumentException("Invalid date format. Expected dd-MM-yyyy");
             }
         }
-        Task task = projectService.setDeadline(taskId, parsedDeadline);
+        Task task = projectService.setDeadline(projectName, taskId, parsedDeadline);
         return ResponseEntity.ok(ProjectMapper.toTaskResponse(task));
     }
 

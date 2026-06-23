@@ -112,12 +112,8 @@ public final class TaskList implements Runnable {
             }
             try {
                 projectService.addProject(details);
-            } catch (RuntimeException e) {
-                if (e.getMessage().contains("already exists")) {
-                    out.printf("Project \"%s\" already exists.%n", details);
-                } else {
+            } catch (Exception e) {
                     out.println(e.getMessage());
-                }
             }
         } else if (subcommand.equals("task")) {
             String[] projectTask = details.split(" ", 2);
@@ -127,12 +123,8 @@ public final class TaskList implements Runnable {
             }
             try {
                 projectService.addTask(projectTask[0], projectTask[1]);
-            } catch (RuntimeException e) {
-                if (e.getMessage().contains("does not exist")) {
-                    out.printf("Could not find a project with a name of \"%s\".%n", projectTask[0]);
-                } else {
+            } catch (Exception e) {
                     out.println(e.getMessage());
-                }
             }
         }
     }
@@ -156,12 +148,8 @@ public final class TaskList implements Runnable {
 
         try {
             projectService.setDone(id, done);
-        } catch (RuntimeException e) {
-            if (e.getMessage().contains("does not exist")) {
-                out.printf("Could not find a task with an ID of %d.%n", id);
-            } else {
+        } catch (Exception e) {
                 out.println(e.getMessage());
-            }
         }
     }
 
@@ -190,12 +178,8 @@ public final class TaskList implements Runnable {
         }
         try {
             projectService.setDeadline(id, parsedDeadline);
-        } catch (RuntimeException e) {
-            if (e.getMessage().contains("does not exist")) {
-                out.printf("Could not find a task with an ID of %d.%n", id);
-            } else {
+        } catch (Exception e) {
                 out.println(e.getMessage());
-            }
         }
     }
 
