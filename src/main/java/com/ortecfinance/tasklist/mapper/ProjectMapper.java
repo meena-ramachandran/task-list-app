@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-public class ProjectMapper {
+public final class ProjectMapper {
     public static TaskResponse toTaskResponse(Task task) {
         return new TaskResponse(task.getId(), task.getDescription(), task.isDone(), task.getDeadline());
     }

@@ -20,8 +20,6 @@ public final class TaskList implements Runnable {
     private final PrintWriter out;
     private final ProjectService projectService;
 
-    private long lastId = 0;
-
     public TaskList(BufferedReader reader, PrintWriter writer, ProjectService projectService) {
         this.in = reader;
         this.out = writer;
@@ -92,11 +90,6 @@ public final class TaskList implements Runnable {
 
     private void add(String commandLine) {
         String[] subcommandRest = commandLine.split(" ", 2);
-        if (subcommandRest.length < 2) {
-            out.println("Project/Task details cannot be empty.");
-            return;
-        }
-
         if (subcommandRest.length < 2 || subcommandRest[1].trim().isEmpty()) {
             out.println("Project/Task details cannot be empty.");
             return;

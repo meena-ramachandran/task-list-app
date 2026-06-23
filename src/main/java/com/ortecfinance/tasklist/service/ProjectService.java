@@ -72,7 +72,7 @@ public class ProjectService {
     }
 
     public void removeTask(long taskId) {
-        Task task = store.findTaskById(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
+        store.findTaskById(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
         store.deleteTaskById(taskId);
     }
 

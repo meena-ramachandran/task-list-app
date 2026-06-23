@@ -1,5 +1,6 @@
 package com.ortecfinance.tasklist.service;
 
+import com.ortecfinance.tasklist.exception.ProjectNotFoundException;
 import com.ortecfinance.tasklist.store.ProjectStore;
 import org.junit.jupiter.api.Test;
 
@@ -32,7 +33,7 @@ public class ProjectServiceTest {
     @Test
     void removeProjectThrowsIfMissing() {
         assertThrows(
-                RuntimeException.class,
+                ProjectNotFoundException.class,
                 () -> service.removeProject("missing")
         );
     }
