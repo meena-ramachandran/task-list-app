@@ -71,7 +71,7 @@ public class ProjectController {
             @PathVariable String projectName,
             @PathVariable long taskId,
             @RequestParam("done") boolean done) {
-        Task task = projectService.setDone(taskId, done);
+        Task task = projectService.setDone(projectName, taskId, done);
         return ResponseEntity.ok(ProjectMapper.toTaskResponse(task));
     }
 
@@ -85,6 +85,11 @@ public class ProjectController {
     @GetMapping("/today")
     public Map<String, List<TaskResponse>> getTasksForToday() {
         return ProjectMapper.toTasksByProject(projectService.getTasksForToday(LocalDate.now()));
+    }
+
+    @GetMapping("/{projectName}")
+    public ProjectResponse getProject(@PathVariable String projectName) {
+        return ProjectMapper.toProjectResponse(projectService.getProject(projectName));
     }
 
     @DeleteMapping("/{projectName}")

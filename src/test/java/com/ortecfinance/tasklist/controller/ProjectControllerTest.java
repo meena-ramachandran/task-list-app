@@ -84,7 +84,7 @@ class ProjectControllerTest {
         mockMvc.perform(put("/projects/any/tasks/9999")
                         .param("deadline", "25-11-2024"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Could not find a task with an ID of 9999."));
+                .andExpect(jsonPath("$.message").value("Could not find a project with the name any."));
     }
 
     @Test

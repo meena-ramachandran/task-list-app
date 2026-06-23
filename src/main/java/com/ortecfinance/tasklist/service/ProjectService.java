@@ -29,6 +29,10 @@ public class ProjectService {
         return store.save(new Project(name));
     }
 
+    public Project getProject(String name){
+        return store.findByName(name).orElseThrow(() -> new ProjectNotFoundException(name));
+    }
+
     public void removeProject(String name) {
         if (!store.existsByName(name)) {
             throw new ProjectNotFoundException(name);
@@ -56,6 +60,13 @@ public class ProjectService {
 
     public Task setDone(long taskId, boolean done) {
         Task task = store.findTaskById(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
+        task.setDone(done);
+        return task;
+    }
+
+    public Task setDone(String projectName, long taskId, boolean done) {
+        Project project =store.findByName(projectName).orElseThrow(() -> new ProjectNotFoundException(projectName));
+        Task task = project.findTask(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
         task.setDone(done);
         return task;
     }
