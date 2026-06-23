@@ -8,7 +8,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class ProjectServiceTests {
+public class ProjectServiceTest {
     private final ProjectStore store = new ProjectStore();
     private final ProjectService service = new ProjectService(store);
 
