@@ -1,6 +1,14 @@
 package com.ortecfinance.tasklist;
 
+import com.ortecfinance.tasklist.service.ProjectService;
+import com.ortecfinance.tasklist.store.ProjectStore;
 import org.junit.jupiter.api.*;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.*;
 import java.time.LocalDate;
@@ -10,25 +18,37 @@ import static java.lang.System.lineSeparator;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
+@SpringBootTest
+@AutoConfigureMockMvc
 public final class ApplicationTest {
     public static final String PROMPT = "> ";
-    private final PipedOutputStream inStream = new PipedOutputStream();
-    private final PrintWriter inWriter = new PrintWriter(inStream, true);
+    @Autowired
+    private ConfigurableApplicationContext context;
 
-    private final PipedInputStream outStream = new PipedInputStream();
-    private final BufferedReader outReader = new BufferedReader(new InputStreamReader(outStream));
+    @Autowired
+    private ProjectStore store;
 
+    private PipedOutputStream inStream;
+    private PrintWriter inWriter;
+    private PipedInputStream outStream;
+    private BufferedReader outReader;
     private Thread applicationThread;
-
-    public ApplicationTest() throws IOException {
-        BufferedReader in = new BufferedReader(new InputStreamReader(new PipedInputStream(inStream)));
-        PrintWriter out = new PrintWriter(new PipedOutputStream(outStream), true);
-        TaskList taskList = new TaskList(in, out);
-        applicationThread = new Thread(taskList);
-    }
 
     @BeforeEach
     public void start_the_application() throws IOException {
+        store.clear();
+        inStream = new PipedOutputStream();
+        inWriter = new PrintWriter(inStream, true);
+        outStream = new PipedInputStream();
+        outReader = new BufferedReader(new InputStreamReader(outStream));
+
+        BufferedReader in = new BufferedReader(new InputStreamReader(new PipedInputStream(inStream)));
+        PrintWriter out = new PrintWriter(new PipedOutputStream(outStream), true);
+
+        ProjectService projectService = context.getBean(ProjectService.class);
+
+        TaskList taskList = new TaskList(in, out, projectService);
+        applicationThread = new Thread(taskList);
         applicationThread.start();
         readLines("Welcome to TaskList! Type 'help' for available commands.");
     }
@@ -195,6 +215,44 @@ public final class ApplicationTest {
                 "No deadline:",
                 "    secrets",
                 "        2: Destroy all humans."
+        );
+
+        execute("quit");
+    }
+
+    @Test
+    void rejectsEmptyProjectAndTaskDetails() throws IOException {
+        execute("add project");
+        readLines("Project/Task details cannot be empty.");
+
+        execute("add project secrets");
+
+        execute("add task secrets ");
+        readLines("Task description cannot be empty.");
+
+        execute("quit");
+    }
+
+    @Test
+    void canRemoveDeadline() throws IOException {
+        execute("add project training");
+        execute("add task training SOLID");
+
+        execute("deadline 1 25-11-2024");
+        execute("show");
+        readLines(
+                "training",
+                "    [ ] 1: SOLID (25-11-2024)",
+                ""
+        );
+
+        // Remove deadline
+        execute("deadline 1 null");
+        execute("show");
+        readLines(
+                "training",
+                "    [ ] 1: SOLID",
+                ""
         );
 
         execute("quit");

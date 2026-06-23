@@ -4,9 +4,7 @@ import com.ortecfinance.tasklist.domain.Project;
 import com.ortecfinance.tasklist.domain.Task;
 import org.springframework.stereotype.Component;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Component
 public class ProjectStore {
@@ -18,8 +16,16 @@ public class ProjectStore {
         return project;
     }
 
+    public List<Project> findAll() {
+        return new ArrayList<>(projects.values());
+    }
+
     public Optional<Project> findByName(String name) {
         return Optional.ofNullable(projects.get(name));
+    }
+
+    public boolean existsByName(String name) {
+        return projects.containsKey(name);
     }
 
     public void deleteByName(String name) {
@@ -53,5 +59,10 @@ public class ProjectStore {
 
     private long nextId() {
         return ++lastId;
+    }
+
+    public void clear() {
+        projects.clear();
+        lastId = 0;
     }
 }
