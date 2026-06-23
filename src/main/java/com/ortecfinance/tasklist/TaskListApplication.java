@@ -13,15 +13,9 @@ import java.io.PrintWriter;
 public class TaskListApplication {
 
     public static void main(String[] args ) {
-//        if (args.length > 0 && args[0].equals("console")) {
             System.out.println("Starting console Application");
             ConfigurableApplicationContext context = SpringApplication.run(TaskListApplication.class);
             startConsole(context);
-//        }
-//        else {
-//            SpringApplication.run(TaskListApplication.class, args);
-//            System.out.println("localhost:8080/tasks");
-//        }
     }
 
     private static void startConsole(ConfigurableApplicationContext context) {

@@ -28,7 +28,7 @@ public class ProjectService {
 
     public void removeProject(String name) {
         if (!store.existsByName(name)) {
-            throw new RuntimeException("Project already exists.");
+            throw new RuntimeException("Project does not exist.");
         }
         store.deleteByName(name);
     }

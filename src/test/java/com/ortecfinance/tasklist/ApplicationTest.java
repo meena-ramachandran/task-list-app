@@ -3,12 +3,10 @@ package com.ortecfinance.tasklist;
 import com.ortecfinance.tasklist.service.ProjectService;
 import com.ortecfinance.tasklist.store.ProjectStore;
 import org.junit.jupiter.api.*;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.io.*;
 import java.time.LocalDate;
