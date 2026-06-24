@@ -1,12 +1,37 @@
 package com.ortecfinance.tasklist.domain;
 
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
 
-public final class Task {
-    private final long id;
-    private final String description;
+@Entity
+@Table(name="tasks")
+public class Task {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String description;
+
+
     private boolean done;
+
     private LocalDate deadline;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="project_id", nullable = false)
+    private Project project;
+
+    private Task(){}
+
+    public Task(String description, boolean done, LocalDate deadline, Project project) {
+        this.description = description;
+        this.done = done;
+        this.deadline = deadline;
+        this.project = project;
+    }
 
     public Task(long id, String description, boolean done, LocalDate deadline) {
         this.id = id;
@@ -15,12 +40,16 @@ public final class Task {
         this.deadline = deadline;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
     public String getDescription() {
         return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public boolean isDone() {
@@ -38,5 +67,12 @@ public final class Task {
 
     public void setDeadline(LocalDate deadline) {
         this.deadline = deadline;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+    public void setProject(Project project) {
+        this.project = project;
     }
 }

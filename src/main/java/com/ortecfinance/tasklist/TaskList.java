@@ -98,7 +98,6 @@ public final class TaskList implements Runnable {
         String details = subcommandRest[1];
 
         if (subcommand.equals("project")) {
-            // 2. Safely capture if the project name itself is blank (e.g., "add project  ")
             if (details.trim().isEmpty()) {
                 out.println("Project name cannot be empty.");
                 return;
@@ -115,7 +114,8 @@ public final class TaskList implements Runnable {
                 return;
             }
             try {
-                projectService.addTask(projectTask[0], projectTask[1]);
+                Task task = new Task(projectTask[1], false, null, null);
+                projectService.addTask(projectTask[0], task);
             } catch (Exception e) {
                     out.println(e.getMessage());
             }

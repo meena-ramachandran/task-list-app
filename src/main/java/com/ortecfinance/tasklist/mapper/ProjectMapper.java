@@ -19,7 +19,7 @@ public final class ProjectMapper {
     }
 
     public static ProjectResponse toProjectResponse(Project project) {
-        return new ProjectResponse(project.getName(), toTaskResponseList(project.getTasks()));
+        return new ProjectResponse(project.getId(), project.getName(), toTaskResponseList(project.getTasks()));
     }
 
     public static List<ProjectResponse> toProjectResponseList(Collection<Project> projects) {

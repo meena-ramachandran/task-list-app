@@ -1,6 +1,7 @@
 package com.ortecfinance.tasklist.service;
 
 import com.ortecfinance.tasklist.exception.ProjectNotFoundException;
+import com.ortecfinance.tasklist.store.InMemoryProjectStore;
 import com.ortecfinance.tasklist.store.ProjectStore;
 import org.junit.jupiter.api.Test;
 
@@ -10,7 +11,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ProjectServiceTest {
-    private final ProjectStore store = new ProjectStore();
+    private final ProjectStore store = new InMemoryProjectStore();
     private final ProjectService service = new ProjectService(store);
 
     @Test
