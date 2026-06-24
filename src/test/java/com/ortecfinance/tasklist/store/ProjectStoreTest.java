@@ -9,7 +9,7 @@ import static org.hamcrest.Matchers.*;
 
 class ProjectStoreTest {
 
-    private final ProjectStore store = new ProjectStore();
+    private final InMemoryProjectStore store = new InMemoryProjectStore();
 
     @Test
     void findByIdReturnsEmptyWhenProjectMissing() {
@@ -41,7 +41,7 @@ class ProjectStoreTest {
 
     @Test
     void findTaskByIdReturnsEmptyWhenMissing() {
-        assertThat(store.findTaskById(99).isEmpty(), is(true));
+        assertThat(store.findTaskById(99L).isEmpty(), is(true));
     }
 
     @Test
@@ -49,7 +49,7 @@ class ProjectStoreTest {
         Project project = new Project("secrets");
         store.save(project);
 
-        Task task = store.saveTask(project, "Eat more donuts.");
+        Task task = store.saveTask(project, new Task("Eat more donuts.", false, null, null));
 
         assertThat(task.getId(), is(1L));
         assertThat(task.getDescription(), is("Eat more donuts."));
@@ -63,8 +63,8 @@ class ProjectStoreTest {
         store.save(a);
         store.save(b);
 
-        Task first = store.saveTask(a, "first");
-        Task second = store.saveTask(b, "second");
+        Task first = store.saveTask(a, new Task("first",  false, null, null));
+        Task second = store.saveTask(b, new Task("second",   false, null, null));
 
         assertThat(first.getId(), is(1L));
         assertThat(second.getId(), is(2L));
@@ -85,7 +85,7 @@ class ProjectStoreTest {
     void deleteTaskByIdRemovesTaskFromCorrectProjectAndReturnsTrue() {
         Project project = new Project("project");
         store.save(project);
-        Task task = store.saveTask(project, "task");
+        Task task = store.saveTask(project, new Task("task",  false, null, null));
 
         boolean removed = store.deleteTaskById(task.getId());
 

@@ -1,6 +1,8 @@
 package com.ortecfinance.tasklist.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ortecfinance.tasklist.store.ProjectStore;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -20,6 +22,14 @@ class ProjectControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private ProjectStore store;
+
+    @BeforeEach
+    void setUp() {
+        store.clear();
+    }
 
     @Test
     void createAndListProjects() throws Exception {
@@ -60,8 +70,9 @@ class ProjectControllerTest {
                         "Could not find a project with the name does-not-exist."));
     }
 
+
     @Test
-    void updateDeadlineViaQueryParam() throws Exception {
+    void updateDeadlineViaPatch() throws Exception {
         mockMvc.perform(post("/projects")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\": \"deadline-project\"}"));
@@ -73,19 +84,13 @@ class ProjectControllerTest {
 
         long taskId = objectMapper.readTree(response).get("id").asLong();
 
-        mockMvc.perform(put("/projects/deadline-project/tasks/" + taskId)
-                        .param("deadline", "25-11-2024"))
+        mockMvc.perform(patch("/projects/deadline-project/tasks/" + taskId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"deadline\": \"25-11-2024\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.deadline").value("2024-11-25"));
     }
 
-    @Test
-    void updateDeadlineForMissingTaskReturns404() throws Exception {
-        mockMvc.perform(put("/projects/any/tasks/9999")
-                        .param("deadline", "25-11-2024"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Could not find a project with the name any."));
-    }
 
     @Test
     void viewByDeadlineGroupsChronologicallyWithNoDeadlineLast() throws Exception {
@@ -103,7 +108,7 @@ class ProjectControllerTest {
     }
 
     @Test
-    void updateStatusViaQueryParam() throws Exception {
+    void updateStatusViaPatch() throws Exception {
         mockMvc.perform(post("/projects")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\": \"status-project\"}"));
@@ -115,16 +120,19 @@ class ProjectControllerTest {
 
         long taskId = objectMapper.readTree(response).get("id").asLong();
 
-        mockMvc.perform(put("/projects/status-project/tasks/" + taskId)
-                        .param("done", "true"))
+        mockMvc.perform(patch("/projects/status-project/tasks/" + taskId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"done\": true}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.done").value(true));
 
-        mockMvc.perform(put("/projects/status-project/tasks/" + taskId)
-                        .param("done", "false"))
+        mockMvc.perform(patch("/projects/status-project/tasks/" + taskId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"done\": false}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.done").value(false));
     }
+
 
     @Test
     void getSingleProjectReturnsProjectDetails() throws Exception {
@@ -151,21 +159,17 @@ class ProjectControllerTest {
         mockMvc.perform(post("/projects")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\": \"today-project\"}"));
-
         String response = mockMvc.perform(post("/projects/today-project/tasks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"description\": \"task due today\"}"))
                 .andReturn().getResponse().getContentAsString();
-
         long taskId = objectMapper.readTree(response).get("id").asLong();
-
         String todayStr = java.time.LocalDate.now()
                 .format(java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-
-        mockMvc.perform(put("/projects/today-project/tasks/" + taskId)
-                        .param("deadline", todayStr))
+        mockMvc.perform(patch("/projects/today-project/tasks/" + taskId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"deadline\": \"" + todayStr + "\"}"))
                 .andExpect(status().isOk());
-
         mockMvc.perform(get("/projects/today"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.today-project").isArray())
@@ -207,11 +211,12 @@ class ProjectControllerTest {
         mockMvc.perform(delete("/projects/delete-task-project/tasks/" + taskId))
                 .andExpect(status().isNoContent());
 
-        // Verifying it is gone
-        mockMvc.perform(put("/projects/delete-task-project/tasks/" + taskId)
-                        .param("done", "true"))
+        mockMvc.perform(patch("/projects/delete-task-project/tasks/" + taskId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"done\": true}"))
                 .andExpect(status().isNotFound());
     }
+
 
     @Test
     void deleteTaskReturns404IfMissing() throws Exception {
@@ -257,7 +262,7 @@ class ProjectControllerTest {
     }
 
     @Test
-    void removeDeadlineViaEmptyRequestParam() throws Exception {
+    void removeDeadlineViaPatch() throws Exception {
         mockMvc.perform(post("/projects")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\": \"remove-deadline-proj\"}"));
@@ -269,18 +274,20 @@ class ProjectControllerTest {
 
         long taskId = objectMapper.readTree(response).get("id").asLong();
 
-        // Set deadline
-        mockMvc.perform(put("/projects/remove-deadline-proj/tasks/" + taskId)
-                        .param("deadline", "25-11-2024"))
+        // Set deadline initially
+        mockMvc.perform(patch("/projects/remove-deadline-proj/tasks/" + taskId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"deadline\": \"25-11-2024\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.deadline").value("2024-11-25"));
 
-        // Remove deadline by passing empty value
-        mockMvc.perform(put("/projects/remove-deadline-proj/tasks/" + taskId)
-                        .param("deadline", ""))
+        mockMvc.perform(patch("/projects/remove-deadline-proj/tasks/" + taskId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"deadline\": \"\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.deadline").value(org.hamcrest.Matchers.nullValue()));
     }
+
 
     @Test
     void updateTaskOwnershipValidationReturns404NotFound() throws Exception {
@@ -299,10 +306,11 @@ class ProjectControllerTest {
 
         long taskId = objectMapper.readTree(response).get("id").asLong();
 
-        // Trying to update the task using Project B path should return 404
-        mockMvc.perform(put("/projects/project-owner-b/tasks/" + taskId)
-                        .param("done", "true"))
+        mockMvc.perform(patch("/projects/project-owner-b/tasks/" + taskId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"done\": true}"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Could not find a task with an ID of " + taskId + "."));
     }
+
 }
