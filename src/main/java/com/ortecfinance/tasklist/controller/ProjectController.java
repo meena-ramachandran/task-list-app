@@ -36,10 +36,10 @@ public class ProjectController {
         return ProjectMapper.toProjectResponseList(projectService.getProjects());
     }
 
-    @GetMapping("/{projectName}")
-    @Operation(summary = "Get a Project by name", description = "Retrieves a project by its unique name")
-    public ProjectResponse getProject(@PathVariable String projectName) {
-        return ProjectMapper.toProjectResponse(projectService.getProject(projectName));
+    @GetMapping("/{projectId}")
+    @Operation(summary = "Get a Project by ID", description = "Retrieves a project by its unique ID")
+    public ProjectResponse getProject(@PathVariable Long projectId) {
+        return ProjectMapper.toProjectResponse(projectService.getProject(projectId));
     }
 
     @PostMapping
@@ -49,29 +49,29 @@ public class ProjectController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ProjectMapper.toProjectResponse(project));
     }
 
-    @PatchMapping("/{projectName}")
+    @PatchMapping("/{projectId}")
     @Operation(summary = "Rename a project", description = "Renames an existing project")
     public ResponseEntity<ProjectResponse> renameProject(
-            @PathVariable String projectName,
+            @PathVariable Long projectId,
             @RequestBody RenameProjectRequest request) {
 
-        Project project = projectService.renameProject(projectName, request.name());
+        Project project = projectService.renameProject(projectId, request.name());
         return ResponseEntity.ok(ProjectMapper.toProjectResponse(project));
     }
 
 
-    @DeleteMapping("/{projectName}")
+    @DeleteMapping("/{projectId}")
     @Operation(summary = "Delete a project", description = "Deletes a project and all its tasks")
-    public ResponseEntity<Void> deleteProject(@PathVariable String projectName) {
-        projectService.removeProject(projectName);
+    public ResponseEntity<Void> deleteProject(@PathVariable Long projectId) {
+        projectService.removeProject(projectId);
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{projectName}/tasks")
+    @PostMapping("/{projectId}/tasks")
     @Operation(summary = "Create a new task", description = "Creates a task within a project")
-    public ResponseEntity<TaskResponse> createTask(@PathVariable String projectName,
+    public ResponseEntity<TaskResponse> createTask(@PathVariable Long projectId,
             @RequestBody CreateTaskRequest request) {
-        Task task = projectService.addTask(projectName, new Task(request.description(), false, null, null));
+        Task task = projectService.addTask(projectId, new Task(request.description(), false, null, null));
         return ResponseEntity.status(HttpStatus.CREATED).body(ProjectMapper.toTaskResponse(task));
     }
 
@@ -87,22 +87,22 @@ public class ProjectController {
         return ProjectMapper.toTasksByProject(projectService.getTasksForToday(LocalDate.now()));
     }
 
-    @PatchMapping("/{projectName}/tasks/{taskId}")
+    @PatchMapping("/{projectId}/tasks/{taskId}")
     @Operation(summary = "Update a task", description = "Updates a task in a project")
     public ResponseEntity<TaskResponse> updateTask(
-            @PathVariable String projectName,
+            @PathVariable Long projectId,
             @PathVariable Long taskId,
             @RequestBody UpdateTaskRequest request) {
-        Task task = projectService.updateTask(projectName, taskId, request);
+        Task task = projectService.updateTask(projectId, taskId, request);
         return ResponseEntity.ok(ProjectMapper.toTaskResponse(task));
     }
 
-    @DeleteMapping("/{projectName}/tasks/{taskId}")
+    @DeleteMapping("/{projectId}/tasks/{taskId}")
     @Operation(summary = "Delete a task", description = "Deletes a task from a project")
     public ResponseEntity<Void> deleteTask(
-            @PathVariable String projectName,
+            @PathVariable Long projectId,
             @PathVariable Long taskId) {
-        projectService.removeTask(projectName, taskId);
+        projectService.removeTask(projectId, taskId);
         return ResponseEntity.noContent().build();
     }
 }

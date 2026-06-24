@@ -33,11 +33,16 @@ class ProjectMapperTest {
     }
 
     @Test
-    void toProjectResponseIncludesAllTasks() {
+    void toProjectResponseIncludesAllTasks() throws Exception {
         Project project = new Project("secrets");
+        java.lang.reflect.Field idField = Project.class.getDeclaredField("id");
+        idField.setAccessible(true);
+        idField.set(project, 42L);
+
         project.addTask(new Task(1L, "Eat more donuts.", false, null));
         project.addTask(new Task(2L, "Destroy all humans.", false, null));
         ProjectResponse response = ProjectMapper.toProjectResponse(project);
+        assertThat(response.id(), is(42L));
         assertThat(response.name(), is("secrets"));
         assertThat(response.tasks(), contains(
                 new TaskResponse(1L, "Eat more donuts.", false, null),

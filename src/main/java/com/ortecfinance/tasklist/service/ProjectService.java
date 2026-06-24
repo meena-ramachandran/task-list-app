@@ -191,4 +191,83 @@ public class ProjectService {
         return project;
     }
 
+    public Project getProject(Long id) {
+        return store.findById(id).orElseThrow(() -> new ProjectNotFoundException(id));
+    }
+
+    @Transactional
+    public void removeProject(Long id) {
+        Project project = store.findById(id).orElseThrow(() -> new ProjectNotFoundException(id));
+        store.deleteByName(project.getName());
+    }
+
+    @Transactional
+    public Task addTask(Long projectId, Task task) {
+        if (task.getDescription() == null || task.getDescription().trim().isEmpty()) {
+            throw new IllegalArgumentException("Task description cannot be empty.");
+        }
+        Project project = store.findById(projectId).orElseThrow(() -> new ProjectNotFoundException(projectId));
+        return store.saveTask(project, task);
+    }
+
+    @Transactional
+    public Task updateTask(Long projectId, Long taskId, UpdateTaskRequest request) {
+        Project project = store.findById(projectId)
+                .orElseThrow(() -> new ProjectNotFoundException(projectId));
+
+        Task task = project.findTask(taskId)
+                .orElseThrow(() -> new TaskNotFoundException(taskId));
+
+        if (request.description() != null) {
+            if (request.description().trim().isEmpty()) {
+                throw new IllegalArgumentException("Task description cannot be empty.");
+            }
+            task.setDescription(request.description());
+        }
+
+        if (request.done() != null) {
+            task.setDone(request.done());
+        }
+
+        if (request.deadline() != null) {
+            String val = request.deadline().trim();
+            if (val.isEmpty() || val.equalsIgnoreCase("null")) {
+                task.setDeadline(null);
+            } else {
+                try {
+                    task.setDeadline(LocalDate.parse(val, DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+                } catch (DateTimeParseException e) {
+                    throw new IllegalArgumentException("Invalid date format. Expected dd-MM-yyyy");
+                }
+            }
+        }
+
+        return task;
+    }
+
+    @Transactional
+    public void removeTask(Long projectId, Long taskId) {
+        Project project = store.findById(projectId).orElseThrow(() -> new ProjectNotFoundException(projectId));
+        project.findTask(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
+        project.removeTask(taskId);
+        store.deleteTaskById(taskId);
+    }
+
+    @Transactional
+    public Project renameProject(Long id, String newName) {
+        if (newName == null || newName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Project name cannot be empty.");
+        }
+
+        Project project = store.findById(id)
+                .orElseThrow(() -> new ProjectNotFoundException(id));
+
+        if (!project.getName().equalsIgnoreCase(newName) && store.existsByName(newName)) {
+            throw new ProjectAlreadyExistsException(newName);
+        }
+
+        store.renameProject(project, newName);
+        return project;
+    }
+
 }
