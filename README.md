@@ -174,15 +174,15 @@ Console functionality is tested using piped input/output streams to simulate use
 * mvn -version
 
 # Installation
-Clone the repository: git clone <repository-url>
-Navigate to the project: cd task-list-app
-Unit Tests: mvn test
-Build the project: mvn clean install
+* Clone the repository: git clone <repository-url>
+* Navigate to the project: cd task-list-app
+* Unit Tests: mvn test
+* Build the project: mvn clean install
 
 
 # Running the Application
-Start the application: mvn spring-boot:run
-The API will be available at: http://localhost:8080
+* Start the application: mvn spring-boot:run
+* The API will be available at: http://localhost:8080
 
 # Assumptions
 
@@ -192,20 +192,22 @@ The API will be available at: http://localhost:8080
 * In-memory persistence is sufficient for the scope of this assessment.
 
 
-# Future Improvements
+# Enhancements
 The current implementation intentionally uses in-memory storage to keep the focus on design and behaviour.
 Possible future enhancements include:
 1. JPA Persistence
-    Replace the in-memory store with:
     * Spring Data JPA
     * H2 Database
 2. OpenAPI Documentation
     Generate interactive API documentation using SpringDoc OpenAPI.
-3. Bean Validation
-    Using annotations:
-    * @NotBlank
-    * @NotNull
-    * @Valid
+3. Model improvements
+
+These enhancements can be found in the open pull request titled "jpa persistence and openapi doc"
+
+# Swagger UI
+Once you run the application, you can view the interactive documentation in your browser at:
+* Swagger UI Page: http://localhost:8080/swagger-ui/index.html
+* OpenAPI Spec (JSON): http://localhost:8080/v3/api-docs
 
 
 
