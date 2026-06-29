@@ -6,15 +6,13 @@ import com.ortecfinance.tasklist.dto.UpdateTaskRequest;
 import com.ortecfinance.tasklist.exception.ProjectAlreadyExistsException;
 import com.ortecfinance.tasklist.exception.ProjectNotFoundException;
 import com.ortecfinance.tasklist.exception.TaskNotFoundException;
-import com.ortecfinance.tasklist.store.InMemoryProjectStore;
 import com.ortecfinance.tasklist.store.ProjectStore;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 
 @Service
 @Transactional(readOnly = true)
@@ -68,19 +66,27 @@ public class ProjectService {
         return task;
     }
 
+    private Task markTaskDone(Task task, boolean done) {
+        task.setDone(done);
+        return task;
+    }
+
+    private Task setTaskDeadline(Task task, LocalDate deadline) {
+        task.setDeadline(deadline);
+        return task;
+    }
+
     @Transactional
     public Task setDone(long taskId, boolean done) {
         Task task = store.findTaskById(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
-        task.setDone(done);
-        return task;
+        return this.markTaskDone(task, done);
     }
 
     @Transactional
     public Task setDone(String projectName, long taskId, boolean done) {
         Project project =store.findByName(projectName).orElseThrow(() -> new ProjectNotFoundException(projectName));
         Task task = project.findTask(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
-        task.setDone(done);
-        return task;
+        return this.markTaskDone(task, done);
     }
 
     @Transactional
@@ -111,12 +117,12 @@ public class ProjectService {
         if (request.deadline() != null) { // Field was sent in request
             String val = request.deadline().trim();
             if (val.isEmpty() || val.equalsIgnoreCase("null")) {
-                task.setDeadline(null); // Explicit removal
+                this.setTaskDeadline(task, null);
             } else {
                 try {
-                    task.setDeadline(LocalDate.parse(val, DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+                    this.setTaskDeadline(task, LocalDate.parse(val));
                 } catch (DateTimeParseException e) {
-                    throw new IllegalArgumentException("Invalid date format. Expected dd-MM-yyyy");
+                    throw new IllegalArgumentException("Invalid date format. Expected yyyy-MM-dd");
                 }
             }
         }
@@ -138,8 +144,7 @@ public class ProjectService {
     public Task setDeadline(String projectName, long taskId, LocalDate deadline) {
         Project project =store.findByName(projectName).orElseThrow(() -> new ProjectNotFoundException(projectName));
         Task task = project.findTask(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
-        task.setDeadline(deadline);
-        return task;
+        return this.setTaskDeadline(task, deadline);
     }
 
     public Map<String, List<Task>> getTasksForToday(LocalDate today) {
@@ -226,18 +231,18 @@ public class ProjectService {
         }
 
         if (request.done() != null) {
-            task.setDone(request.done());
+            this.markTaskDone(task, request.done());
         }
 
         if (request.deadline() != null) {
             String val = request.deadline().trim();
             if (val.isEmpty() || val.equalsIgnoreCase("null")) {
-                task.setDeadline(null);
+                this.setTaskDeadline(task, null);
             } else {
                 try {
-                    task.setDeadline(LocalDate.parse(val, DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+                    this.setTaskDeadline(task, LocalDate.parse(val));
                 } catch (DateTimeParseException e) {
-                    throw new IllegalArgumentException("Invalid date format. Expected dd-MM-yyyy");
+                    throw new IllegalArgumentException("Invalid date format. Expected yyyy-MM-dd");
                 }
             }
         }
