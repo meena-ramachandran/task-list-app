@@ -6,10 +6,10 @@ import com.ortecfinance.tasklist.exception.ProjectAlreadyExistsException;
 import com.ortecfinance.tasklist.exception.ProjectNotFoundException;
 import com.ortecfinance.tasklist.exception.TaskNotFoundException;
 import com.ortecfinance.tasklist.store.ProjectStore;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.util.*;
+import org.springframework.stereotype.Service;
+
 
 @Service
 public class ProjectService {
@@ -54,21 +54,28 @@ public class ProjectService {
 
     public Task setDeadline(long taskId, LocalDate deadline) {
         Task task = store.findTaskById(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
+        return setTaskDeadline(task, deadline);
+    }
+
+    private Task markTaskDone(Task task, boolean done) {
+        task.setDone(done);
+        return task;
+    }
+
+    private Task setTaskDeadline(Task task, LocalDate deadline) {
         task.setDeadline(deadline);
         return task;
     }
 
     public Task setDone(long taskId, boolean done) {
         Task task = store.findTaskById(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
-        task.setDone(done);
-        return task;
+        return markTaskDone(task, done);
     }
 
     public Task setDone(String projectName, long taskId, boolean done) {
         Project project =store.findByName(projectName).orElseThrow(() -> new ProjectNotFoundException(projectName));
         Task task = project.findTask(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
-        task.setDone(done);
-        return task;
+        return markTaskDone(task, done);
     }
 
     public void removeTask(long taskId) {
@@ -79,8 +86,7 @@ public class ProjectService {
     public Task setDeadline(String projectName, long taskId, LocalDate deadline) {
         Project project =store.findByName(projectName).orElseThrow(() -> new ProjectNotFoundException(projectName));
         Task task = project.findTask(taskId).orElseThrow(() -> new TaskNotFoundException(taskId));
-        task.setDeadline(deadline);
-        return task;
+        return setTaskDeadline(task, deadline);
     }
 
     public Map<String, List<Task>> getTasksForToday(LocalDate today) {

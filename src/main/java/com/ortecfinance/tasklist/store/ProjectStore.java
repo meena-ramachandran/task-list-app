@@ -2,9 +2,9 @@ package com.ortecfinance.tasklist.store;
 
 import com.ortecfinance.tasklist.domain.Project;
 import com.ortecfinance.tasklist.domain.Task;
+import java.util.*;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
 
 @Component
 public class ProjectStore {
