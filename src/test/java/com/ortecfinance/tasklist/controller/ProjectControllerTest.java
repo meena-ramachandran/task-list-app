@@ -1,6 +1,8 @@
 package com.ortecfinance.tasklist.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ortecfinance.tasklist.store.ProjectStore;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -20,6 +22,14 @@ class ProjectControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private ProjectStore store;
+
+    @BeforeEach
+    void setUp() {
+        store.clear();
+    }
 
     @Test
     void createAndListProjects() throws Exception {
