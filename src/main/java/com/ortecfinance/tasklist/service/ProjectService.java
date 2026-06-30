@@ -251,7 +251,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public Project renameProject(Long id, String newName) {
+    public Project updateProject(Long id, String newName) {
         if (newName == null || newName.trim().isEmpty()) {
             throw new IllegalArgumentException("Project name cannot be empty.");
         }

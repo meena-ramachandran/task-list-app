@@ -515,7 +515,7 @@ public class ProjectServiceTest {
     @Test
     void renameProjectByIdSuccessful() {
         Project project = service.addProject("secrets");
-        Project renamed = service.renameProject(project.getId(), "super-secrets");
+        Project renamed = service.updateProject(project.getId(), "super-secrets");
 
         assertThat(renamed.getName(), is("super-secrets"));
         assertThat(store.existsByName("secrets"), is(false));
@@ -527,7 +527,7 @@ public class ProjectServiceTest {
         Project project = service.addProject("secrets");
         assertThrows(
                 IllegalArgumentException.class,
-                () -> service.renameProject(project.getId(), "   ")
+                () -> service.updateProject(project.getId(), "   ")
         );
     }
 
@@ -535,7 +535,7 @@ public class ProjectServiceTest {
     void renameProjectByIdThrowsProjectNotFound() {
         assertThrows(
                 ProjectNotFoundException.class,
-                () -> service.renameProject(999L, "newName")
+                () -> service.updateProject(999L, "newName")
         );
     }
 
@@ -545,7 +545,7 @@ public class ProjectServiceTest {
         Project p2 = service.addProject("training");
         assertThrows(
                 ProjectAlreadyExistsException.class,
-                () -> service.renameProject(p1.getId(), "training")
+                () -> service.updateProject(p1.getId(), "training")
         );
     }
 }

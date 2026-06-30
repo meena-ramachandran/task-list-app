@@ -50,12 +50,12 @@ public class ProjectController {
     }
 
     @PatchMapping("/{projectId}")
-    @Operation(summary = "Rename a project", description = "Renames an existing project")
+    @Operation(summary = "Updates a project", description = "Updates an existing project")
     public ResponseEntity<ProjectResponse> renameProject(
             @PathVariable Long projectId,
-            @RequestBody RenameProjectRequest request) {
+            @RequestBody UpdateProjectRequest request) {
 
-        Project project = projectService.renameProject(projectId, request.name());
+        Project project = projectService.updateProject(projectId, request.name());
         return ResponseEntity.ok(ProjectMapper.toProjectResponse(project));
     }
 
