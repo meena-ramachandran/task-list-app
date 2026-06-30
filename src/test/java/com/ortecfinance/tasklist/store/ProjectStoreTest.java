@@ -98,4 +98,63 @@ class ProjectStoreTest {
         boolean removed = store.deleteTaskById(999L);
         assertThat(removed, is(false));
     }
+
+    @Test
+    void findByIdReturnsProjectWhenExists() {
+        Project project = new Project("secrets");
+        store.save(project);
+        assertThat(store.findById(project.getId()).get(), is(project));
+    }
+
+    @Test
+    void findByIdReturnsEmptyWhenIdIsNull() {
+        assertThat(store.findById(null).isEmpty(), is(true));
+    }
+
+    @Test
+    void renameProjectUpdatesNameAndMapping() {
+        Project project = new Project("secrets");
+        store.save(project);
+
+        store.renameProject(project, "super-secrets");
+
+        assertThat(project.getName(), is("super-secrets"));
+        assertThat(store.existsByName("secrets"), is(false));
+        assertThat(store.existsByName("super-secrets"), is(true));
+        assertThat(store.findByName("super-secrets").get(), is(project));
+    }
+
+    @Test
+    void clearResetsStoreAndIds() {
+        Project project = new Project("secrets");
+        store.save(project);
+        store.saveTask(project, new Task("Eat more donuts.", false, null, null));
+
+        store.clear();
+
+        assertThat(store.findAll(), is(empty()));
+        assertThat(store.findTaskById(1L).isEmpty(), is(true));
+
+        Project newProject = new Project("new-secrets");
+        store.save(newProject);
+        assertThat(newProject.getId(), is(1L));
+    }
+
+    @Test
+    void findTasksByDeadlineFiltersCorrectly() {
+        Project project = new Project("secrets");
+        store.save(project);
+
+        java.time.LocalDate today = java.time.LocalDate.now();
+        java.time.LocalDate tomorrow = today.plusDays(1);
+
+        Task t1 = store.saveTask(project, new Task("t1", false, today, null));
+        Task t2 = store.saveTask(project, new Task("t2", false, tomorrow, null));
+        Task t3 = store.saveTask(project, new Task("t3", false, today, null));
+
+        java.util.Collection<Task> tasks = store.findTasksByDeadline(today);
+        assertThat(tasks, containsInAnyOrder(t1, t3));
+
+        assertThat(store.findTasksByDeadline(null), is(empty()));
+    }
 }

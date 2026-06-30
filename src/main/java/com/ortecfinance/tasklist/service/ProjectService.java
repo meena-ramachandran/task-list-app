@@ -119,11 +119,7 @@ public class ProjectService {
             if (val.isEmpty() || val.equalsIgnoreCase("null")) {
                 this.setTaskDeadline(task, null);
             } else {
-                try {
-                    this.setTaskDeadline(task, LocalDate.parse(val));
-                } catch (DateTimeParseException e) {
-                    throw new IllegalArgumentException("Invalid date format. Expected yyyy-MM-dd");
-                }
+                this.setTaskDeadline(task, parseDate(val));
             }
         }
 
@@ -239,11 +235,7 @@ public class ProjectService {
             if (val.isEmpty() || val.equalsIgnoreCase("null")) {
                 this.setTaskDeadline(task, null);
             } else {
-                try {
-                    this.setTaskDeadline(task, LocalDate.parse(val));
-                } catch (DateTimeParseException e) {
-                    throw new IllegalArgumentException("Invalid date format. Expected yyyy-MM-dd");
-                }
+                this.setTaskDeadline(task, parseDate(val));
             }
         }
 
@@ -273,6 +265,18 @@ public class ProjectService {
 
         store.renameProject(project, newName);
         return project;
+    }
+
+    private LocalDate parseDate(String val) {
+        try {
+            return LocalDate.parse(val, java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+        } catch (DateTimeParseException e) {
+            try {
+                return LocalDate.parse(val);
+            } catch (DateTimeParseException ex) {
+                throw new IllegalArgumentException("Invalid date format. Expected dd-MM-yyyy or yyyy-MM-dd");
+            }
+        }
     }
 
 }
